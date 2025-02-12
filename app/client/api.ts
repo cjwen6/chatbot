@@ -40,11 +40,14 @@ export interface MultimodalContent {
   };
 }
 
+<<<<<<< HEAD
 export interface MultimodalContentForAlibaba {
   text?: string;
   image?: string;
 }
 
+=======
+>>>>>>> 1237
 export interface RequestMessage {
   role: MessageRole;
   content: string | MultimodalContent[];

@@ -66,11 +66,19 @@ export function Avatar(props: { model?: ModelType; avatar?: string }) {
       LlmIcon = BotIconGemma;
     } else if (modelName.startsWith("claude")) {
       LlmIcon = BotIconClaude;
+<<<<<<< HEAD
     } else if (modelName.includes("llama")) {
       LlmIcon = BotIconMeta;
     } else if (modelName.startsWith("mixtral") || modelName.startsWith("codestral")) {
       LlmIcon = BotIconMistral;
     } else if (modelName.includes("deepseek")) {
+=======
+    } else if (modelName.toLowerCase().includes("llama")) {
+      LlmIcon = BotIconMeta;
+    } else if (modelName.startsWith("mixtral")) {
+      LlmIcon = BotIconMistral;
+    } else if (modelName.toLowerCase().includes("deepseek")) {
+>>>>>>> 1237
       LlmIcon = BotIconDeepseek;
     } else if (modelName.startsWith("moonshot")) {
       LlmIcon = BotIconMoonshot;
@@ -85,7 +93,11 @@ export function Avatar(props: { model?: ModelType; avatar?: string }) {
     } else if (modelName.startsWith("doubao") || modelName.startsWith("ep-")) {
       LlmIcon = BotIconDoubao;
     } else if (
+<<<<<<< HEAD
       modelName.includes("glm") ||
+=======
+      modelName.toLowerCase().includes("glm") ||
+>>>>>>> 1237
       modelName.startsWith("cogview-") ||
       modelName.startsWith("cogvideox-")
     ) {

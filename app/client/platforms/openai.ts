@@ -8,6 +8,10 @@ import {
   Azure,
   REQUEST_TIMEOUT_MS,
   ServiceProvider,
+<<<<<<< HEAD
+=======
+  REQUEST_TIMEOUT_MS_FOR_THINKING,
+>>>>>>> 1237
 } from "@/app/constant";
 import {
   ChatMessageTool,
@@ -21,7 +25,11 @@ import {
   preProcessImageContent,
   uploadImage,
   base64Image2Blob,
+<<<<<<< HEAD
   streamWithThink,
+=======
+  stream,
+>>>>>>> 1237
 } from "@/app/utils/chat";
 import { cloudflareAIGatewayUrl } from "@/app/utils/cloudflare";
 import { ModelSize, DalleQuality, DalleStyle } from "@/app/typing";
@@ -41,7 +49,10 @@ import {
   getMessageTextContent,
   isVisionModel,
   isDalle3 as _isDalle3,
+<<<<<<< HEAD
   getTimeoutMSByModel,
+=======
+>>>>>>> 1237
 } from "@/app/utils";
 import { fetch } from "@/app/utils/stream";
 
@@ -294,7 +305,11 @@ export class ChatGPTApi implements LLMApi {
             useChatStore.getState().currentSession().mask?.plugin || [],
           );
         // console.log("getAsTools", tools, funcs);
+<<<<<<< HEAD
         streamWithThink(
+=======
+        stream(
+>>>>>>> 1237
           chatPath,
           requestPayload,
           getHeaders(),
@@ -309,12 +324,17 @@ export class ChatGPTApi implements LLMApi {
               delta: {
                 content: string;
                 tool_calls: ChatMessageTool[];
+<<<<<<< HEAD
                 reasoning_content: string | null;
               };
             }>;
 
             if (!choices?.length) return { isThinking: false, content: "" };
 
+=======
+              };
+            }>;
+>>>>>>> 1237
             const tool_calls = choices[0]?.delta?.tool_calls;
             if (tool_calls?.length > 0) {
               const id = tool_calls[0]?.id;
@@ -334,6 +354,7 @@ export class ChatGPTApi implements LLMApi {
                 runTools[index]["function"]["arguments"] += args;
               }
             }
+<<<<<<< HEAD
 
             const reasoning = choices[0]?.delta?.reasoning_content;
             const content = choices[0]?.delta?.content;
@@ -365,6 +386,9 @@ export class ChatGPTApi implements LLMApi {
               isThinking: false,
               content: "",
             };
+=======
+            return choices[0]?.delta?.content;
+>>>>>>> 1237
           },
           // processToolMessage, include tool_calls message and tool call results
           (
@@ -396,7 +420,13 @@ export class ChatGPTApi implements LLMApi {
         // make a fetch request
         const requestTimeoutId = setTimeout(
           () => controller.abort(),
+<<<<<<< HEAD
           getTimeoutMSByModel(options.config.model),
+=======
+          isDalle3 || isO1OrO3
+            ? REQUEST_TIMEOUT_MS_FOR_THINKING
+            : REQUEST_TIMEOUT_MS, // dalle3 using b64_json is slow.
+>>>>>>> 1237
         );
 
         const res = await fetch(chatPath, chatPayload);

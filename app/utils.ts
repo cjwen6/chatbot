@@ -2,11 +2,15 @@ import { useEffect, useState } from "react";
 import { showToast } from "./components/ui-lib";
 import Locale from "./locales";
 import { RequestMessage } from "./client/api";
+<<<<<<< HEAD
 import {
   REQUEST_TIMEOUT_MS,
   REQUEST_TIMEOUT_MS_FOR_THINKING,
   ServiceProvider,
 } from "./constant";
+=======
+import { ServiceProvider } from "./constant";
+>>>>>>> 1237
 // import { fetch as tauriFetch, ResponseType } from "@tauri-apps/api/http";
 import { fetch as tauriStreamFetch } from "./utils/stream";
 import { VISION_MODEL_REGEXES, EXCLUDE_VISION_MODEL_REGEXES } from "./constant";
@@ -296,6 +300,7 @@ export function isDalle3(model: string) {
   return "dall-e-3" === model;
 }
 
+<<<<<<< HEAD
 export function getTimeoutMSByModel(model: string) {
   model = model.toLowerCase();
   if (
@@ -310,6 +315,8 @@ export function getTimeoutMSByModel(model: string) {
   return REQUEST_TIMEOUT_MS;
 }
 
+=======
+>>>>>>> 1237
 export function getModelSizes(model: string): ModelSize[] {
   if (isDalle3(model)) {
     return ["1024x1024", "1792x1024", "1024x1792"];
