@@ -1,10 +1,6 @@
 "use client";
 // azure and openai, using same models. so using same LLMApi.
-<<<<<<< HEAD
 import { ApiPath, XAI_BASE_URL, XAI } from "@/app/constant";
-=======
-import { ApiPath, XAI_BASE_URL, XAI, REQUEST_TIMEOUT_MS } from "@/app/constant";
->>>>>>> 1237
 import {
   useAccessStore,
   useAppConfig,
@@ -21,10 +17,7 @@ import {
   SpeechOptions,
 } from "../api";
 import { getClientConfig } from "@/app/config/client";
-<<<<<<< HEAD
 import { getTimeoutMSByModel } from "@/app/utils";
-=======
->>>>>>> 1237
 import { preProcessImageContent } from "@/app/utils/chat";
 import { RequestPayload } from "./openai";
 import { fetch } from "@/app/utils/stream";
@@ -111,11 +104,7 @@ export class XAIApi implements LLMApi {
       // make a fetch request
       const requestTimeoutId = setTimeout(
         () => controller.abort(),
-<<<<<<< HEAD
         getTimeoutMSByModel(options.config.model),
-=======
-        REQUEST_TIMEOUT_MS,
->>>>>>> 1237
       );
 
       if (shouldStream) {

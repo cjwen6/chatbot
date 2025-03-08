@@ -1,5 +1,4 @@
 "use client";
-<<<<<<< HEAD
 import { ApiPath, Alibaba, ALIBABA_BASE_URL } from "@/app/constant";
 import {
   useAccessStore,
@@ -12,16 +11,6 @@ import {
   preProcessImageContentForAlibabaDashScope,
   streamWithThink,
 } from "@/app/utils/chat";
-=======
-import {
-  ApiPath,
-  Alibaba,
-  ALIBABA_BASE_URL,
-  REQUEST_TIMEOUT_MS,
-} from "@/app/constant";
-import { useAccessStore, useAppConfig, useChatStore } from "@/app/store";
-
->>>>>>> 1237
 import {
   ChatOptions,
   getHeaders,
@@ -29,7 +18,6 @@ import {
   LLMModel,
   SpeechOptions,
   MultimodalContent,
-<<<<<<< HEAD
   MultimodalContentForAlibaba,
 } from "../api";
 import { getClientConfig } from "@/app/config/client";
@@ -39,17 +27,6 @@ import {
   getTimeoutMSByModel,
   isVisionModel,
 } from "@/app/utils";
-=======
-} from "../api";
-import Locale from "../../locales";
-import {
-  EventStreamContentType,
-  fetchEventSource,
-} from "@fortaine/fetch-event-source";
-import { prettyObject } from "@/app/utils/format";
-import { getClientConfig } from "@/app/config/client";
-import { getMessageTextContent } from "@/app/utils";
->>>>>>> 1237
 import { fetch } from "@/app/utils/stream";
 
 export interface OpenAIListModelResponse {
@@ -117,14 +94,6 @@ export class QwenApi implements LLMApi {
   }
 
   async chat(options: ChatOptions) {
-<<<<<<< HEAD
-=======
-    const messages = options.messages.map((v) => ({
-      role: v.role,
-      content: getMessageTextContent(v),
-    }));
-
->>>>>>> 1237
     const modelConfig = {
       ...useAppConfig.getState().modelConfig,
       ...useChatStore.getState().currentSession().mask.modelConfig,
@@ -133,7 +102,6 @@ export class QwenApi implements LLMApi {
       },
     };
 
-<<<<<<< HEAD
     const visionModel = isVisionModel(options.config.model);
 
     const messages: ChatOptions["messages"] = [];
@@ -149,8 +117,6 @@ export class QwenApi implements LLMApi {
       messages.push({ role: v.role, content });
     }
 
-=======
->>>>>>> 1237
     const shouldStream = !!options.config.stream;
     const requestPayload: RequestPayload = {
       model: modelConfig.model,
@@ -170,34 +136,22 @@ export class QwenApi implements LLMApi {
     options.onController?.(controller);
 
     try {
-<<<<<<< HEAD
       const headers = {
         ...getHeaders(),
         "X-DashScope-SSE": shouldStream ? "enable" : "disable",
       };
 
       const chatPath = this.path(Alibaba.ChatPath(modelConfig.model));
-=======
-      const chatPath = this.path(Alibaba.ChatPath);
->>>>>>> 1237
       const chatPayload = {
         method: "POST",
         body: JSON.stringify(requestPayload),
         signal: controller.signal,
-<<<<<<< HEAD
         headers: headers,
-=======
-        headers: {
-          ...getHeaders(),
-          "X-DashScope-SSE": shouldStream ? "enable" : "disable",
-        },
->>>>>>> 1237
       };
 
       // make a fetch request
       const requestTimeoutId = setTimeout(
         () => controller.abort(),
-<<<<<<< HEAD
         getTimeoutMSByModel(options.config.model),
       );
 
@@ -296,122 +250,6 @@ export class QwenApi implements LLMApi {
           },
           options,
         );
-=======
-        REQUEST_TIMEOUT_MS,
-      );
-
-      if (shouldStream) {
-        let responseText = "";
-        let remainText = "";
-        let finished = false;
-        let responseRes: Response;
-
-        // animate response to make it looks smooth
-        function animateResponseText() {
-          if (finished || controller.signal.aborted) {
-            responseText += remainText;
-            console.log("[Response Animation] finished");
-            if (responseText?.length === 0) {
-              options.onError?.(new Error("empty response from server"));
-            }
-            return;
-          }
-
-          if (remainText.length > 0) {
-            const fetchCount = Math.max(1, Math.round(remainText.length / 60));
-            const fetchText = remainText.slice(0, fetchCount);
-            responseText += fetchText;
-            remainText = remainText.slice(fetchCount);
-            options.onUpdate?.(responseText, fetchText);
-          }
-
-          requestAnimationFrame(animateResponseText);
-        }
-
-        // start animaion
-        animateResponseText();
-
-        const finish = () => {
-          if (!finished) {
-            finished = true;
-            options.onFinish(responseText + remainText, responseRes);
-          }
-        };
-
-        controller.signal.onabort = finish;
-
-        fetchEventSource(chatPath, {
-          fetch: fetch as any,
-          ...chatPayload,
-          async onopen(res) {
-            clearTimeout(requestTimeoutId);
-            const contentType = res.headers.get("content-type");
-            console.log(
-              "[Alibaba] request response content type: ",
-              contentType,
-            );
-            responseRes = res;
-
-            if (contentType?.startsWith("text/plain")) {
-              responseText = await res.clone().text();
-              return finish();
-            }
-
-            if (
-              !res.ok ||
-              !res.headers
-                .get("content-type")
-                ?.startsWith(EventStreamContentType) ||
-              res.status !== 200
-            ) {
-              const responseTexts = [responseText];
-              let extraInfo = await res.clone().text();
-              try {
-                const resJson = await res.clone().json();
-                extraInfo = prettyObject(resJson);
-              } catch {}
-
-              if (res.status === 401) {
-                responseTexts.push(Locale.Error.Unauthorized);
-              }
-
-              if (extraInfo) {
-                responseTexts.push(extraInfo);
-              }
-
-              responseText = responseTexts.join("\n\n");
-
-              return finish();
-            }
-          },
-          onmessage(msg) {
-            if (msg.data === "[DONE]" || finished) {
-              return finish();
-            }
-            const text = msg.data;
-            try {
-              const json = JSON.parse(text);
-              const choices = json.output.choices as Array<{
-                message: { content: string };
-              }>;
-              const delta = choices[0]?.message?.content;
-              if (delta) {
-                remainText += delta;
-              }
-            } catch (e) {
-              console.error("[Request] parse error", text, msg);
-            }
-          },
-          onclose() {
-            finish();
-          },
-          onerror(e) {
-            options.onError?.(e);
-            throw e;
-          },
-          openWhenHidden: true,
-        });
->>>>>>> 1237
       } else {
         const res = await fetch(chatPath, chatPayload);
         clearTimeout(requestTimeoutId);

@@ -3,11 +3,7 @@ import {
   UPLOAD_URL,
   REQUEST_TIMEOUT_MS,
 } from "@/app/constant";
-<<<<<<< HEAD
 import { MultimodalContent, RequestMessage } from "@/app/client/api";
-=======
-import { RequestMessage } from "@/app/client/api";
->>>>>>> 1237
 import Locale from "@/app/locales";
 import {
   EventStreamContentType,
@@ -74,14 +70,9 @@ export function compressImage(file: Blob, maxSize: number): Promise<string> {
   });
 }
 
-<<<<<<< HEAD
 export async function preProcessImageContentBase(
   content: RequestMessage["content"],
   transformImageUrl: (url: string) => Promise<{ [key: string]: any }>,
-=======
-export async function preProcessImageContent(
-  content: RequestMessage["content"],
->>>>>>> 1237
 ) {
   if (typeof content === "string") {
     return content;
@@ -91,11 +82,7 @@ export async function preProcessImageContent(
     if (part?.type == "image_url" && part?.image_url?.url) {
       try {
         const url = await cacheImageToBase64Image(part?.image_url?.url);
-<<<<<<< HEAD
         result.push(await transformImageUrl(url));
-=======
-        result.push({ type: part.type, image_url: { url } });
->>>>>>> 1237
       } catch (error) {
         console.error("Error processing image URL:", error);
       }
@@ -106,7 +93,6 @@ export async function preProcessImageContent(
   return result;
 }
 
-<<<<<<< HEAD
 export async function preProcessImageContent(
   content: RequestMessage["content"],
 ) {
@@ -124,8 +110,6 @@ export async function preProcessImageContentForAlibabaDashScope(
   }));
 }
 
-=======
->>>>>>> 1237
 const imageCaches: Record<string, string> = {};
 export function cacheImageToBase64Image(imageUrl: string) {
   if (imageUrl.includes(CACHE_URL_PREFIX)) {
@@ -434,10 +418,7 @@ export function streamWithThink(
   let responseRes: Response;
   let isInThinkingMode = false;
   let lastIsThinking = false;
-<<<<<<< HEAD
   let lastIsThinkingTagged = false; //between <think> and </think> tags
-=======
->>>>>>> 1237
 
   // animate response to make it looks smooth
   function animateResponseText() {
@@ -617,7 +598,6 @@ export function streamWithThink(
           if (!chunk?.content || chunk.content.length === 0) {
             return;
           }
-<<<<<<< HEAD
 
           // deal with <think> and </think> tags start
           if (!chunk.isThinking) {
@@ -635,8 +615,6 @@ export function streamWithThink(
           }
           // deal with <think> and </think> tags start
 
-=======
->>>>>>> 1237
           // Check if thinking mode changed
           const isThinkingChanged = lastIsThinking !== chunk.isThinking;
           lastIsThinking = chunk.isThinking;

@@ -221,16 +221,12 @@ export const ByteDance = {
 
 export const Alibaba = {
   ExampleEndpoint: ALIBABA_BASE_URL,
-<<<<<<< HEAD
   ChatPath: (modelName: string) => {
     if (modelName.includes("vl") || modelName.includes("omni")) {
       return "v1/services/aigc/multimodal-generation/generation";
     }
     return `v1/services/aigc/text-generation/generation`;
   },
-=======
-  ChatPath: "v1/services/aigc/text-generation/generation",
->>>>>>> 1237
 };
 
 export const Tencent = {
@@ -544,11 +540,8 @@ const anthropicModels = [
   "claude-3-5-sonnet-20240620",
   "claude-3-5-sonnet-20241022",
   "claude-3-5-sonnet-latest",
-<<<<<<< HEAD
   "claude-3-7-sonnet-20250219",
   "claude-3-7-sonnet-latest",
-=======
->>>>>>> 1237
 ];
 
 const baiduModels = [
@@ -582,12 +575,9 @@ const alibabaModes = [
   "qwen-max-0403",
   "qwen-max-0107",
   "qwen-max-longcontext",
-<<<<<<< HEAD
   "qwen-omni-turbo",
   "qwen-vl-plus",
   "qwen-vl-max",
-=======
->>>>>>> 1237
 ];
 
 const tencentModels = [
@@ -836,10 +826,5 @@ export const internalAllowedWebDavEndpoints = [
 
 export const DEFAULT_GA_ID = "G-89WN60ZK2E";
 
-<<<<<<< HEAD
 export const SAAS_CHAT_URL = "https://nextchat.club";
 export const SAAS_CHAT_UTM_URL = "https://nextchat.club?utm=github";
-=======
-export const SAAS_CHAT_URL = "https://nextchat.dev/chat";
-export const SAAS_CHAT_UTM_URL = "https://nextchat.dev/chat?utm=github";
->>>>>>> 1237

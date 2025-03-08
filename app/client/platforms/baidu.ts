@@ -1,14 +1,5 @@
 "use client";
-<<<<<<< HEAD
 import { ApiPath, Baidu, BAIDU_BASE_URL } from "@/app/constant";
-=======
-import {
-  ApiPath,
-  Baidu,
-  BAIDU_BASE_URL,
-  REQUEST_TIMEOUT_MS,
-} from "@/app/constant";
->>>>>>> 1237
 import { useAccessStore, useAppConfig, useChatStore } from "@/app/store";
 import { getAccessToken } from "@/app/utils/baidu";
 
@@ -27,11 +18,7 @@ import {
 } from "@fortaine/fetch-event-source";
 import { prettyObject } from "@/app/utils/format";
 import { getClientConfig } from "@/app/config/client";
-<<<<<<< HEAD
 import { getMessageTextContent, getTimeoutMSByModel } from "@/app/utils";
-=======
-import { getMessageTextContent } from "@/app/utils";
->>>>>>> 1237
 import { fetch } from "@/app/utils/stream";
 
 export interface OpenAIListModelResponse {
@@ -163,11 +150,7 @@ export class ErnieApi implements LLMApi {
       // make a fetch request
       const requestTimeoutId = setTimeout(
         () => controller.abort(),
-<<<<<<< HEAD
         getTimeoutMSByModel(options.config.model),
-=======
-        REQUEST_TIMEOUT_MS,
->>>>>>> 1237
       );
 
       if (shouldStream) {

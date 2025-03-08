@@ -1,10 +1,6 @@
 <div align="center">
 
-<<<<<<< HEAD
 <a href='https://nextchat.club'>
-=======
-<a href='https://nextchat.dev/chat'>
->>>>>>> 1237
   <img src="https://github.com/user-attachments/assets/83bdcc07-ae5e-4954-a53a-ac151ba6ccf3" width="1000" alt="icon"/>
 </a>
 
@@ -26,17 +22,10 @@ English / [简体中文](./README_CN.md)
 [![MacOS][MacOS-image]][download-url]
 [![Linux][Linux-image]][download-url]
 
-<<<<<<< HEAD
 [NextChatAI](https://nextchat.club?utm_source=readme) / [Web App Demo](https://app.nextchat.dev) / [Desktop App](https://github.com/Yidadaa/ChatGPT-Next-Web/releases) / [Discord](https://discord.gg/YCkeafCafC) / [Enterprise Edition](#enterprise-edition) / [Twitter](https://twitter.com/NextChatDev)
 
 
 [saas-url]: https://nextchat.club?utm_source=readme
-=======
-[NextChatAI](https://nextchat.dev/chat?utm_source=readme) / [Web App Demo](https://app.nextchat.dev) / [Desktop App](https://github.com/Yidadaa/ChatGPT-Next-Web/releases) 
-
-
-[saas-url]: https://nextchat.dev/chat?utm_source=readme
->>>>>>> 1237
 [saas-image]: https://img.shields.io/badge/NextChat-Saas-green?logo=microsoftedge
 [web-url]: https://app.nextchat.dev/
 [download-url]: https://github.com/Yidadaa/ChatGPT-Next-Web/releases
@@ -51,7 +40,6 @@ English / [简体中文](./README_CN.md)
 
 </div>
 
-<<<<<<< HEAD
 ## 👋 Hey, NextChat is going to develop a native app!
 
 > This week we are going to start working on iOS and Android APP, and we want to find some reliable friends to do it together!
@@ -70,8 +58,6 @@ https://github.com/ChatGPTNextWeb/NextChat/issues/6269
 #Seeking for talents is thirsty #lack of people
 
 
-=======
->>>>>>> 1237
 ## 🥳 Cheer for DeepSeek, China's AI star!
  > Purpose-Built UI for DeepSeek Reasoner Model
  

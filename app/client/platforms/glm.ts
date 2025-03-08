@@ -1,14 +1,5 @@
 "use client";
-<<<<<<< HEAD
 import { ApiPath, CHATGLM_BASE_URL, ChatGLM } from "@/app/constant";
-=======
-import {
-  ApiPath,
-  CHATGLM_BASE_URL,
-  ChatGLM,
-  REQUEST_TIMEOUT_MS,
-} from "@/app/constant";
->>>>>>> 1237
 import {
   useAccessStore,
   useAppConfig,
@@ -25,15 +16,11 @@ import {
   SpeechOptions,
 } from "../api";
 import { getClientConfig } from "@/app/config/client";
-<<<<<<< HEAD
 import {
   getMessageTextContent,
   isVisionModel,
   getTimeoutMSByModel,
 } from "@/app/utils";
-=======
-import { getMessageTextContent, isVisionModel } from "@/app/utils";
->>>>>>> 1237
 import { RequestPayload } from "./openai";
 import { fetch } from "@/app/utils/stream";
 import { preProcessImageContent } from "@/app/utils/chat";
@@ -203,11 +190,7 @@ export class ChatGLMApi implements LLMApi {
 
       const requestTimeoutId = setTimeout(
         () => controller.abort(),
-<<<<<<< HEAD
         getTimeoutMSByModel(options.config.model),
-=======
-        REQUEST_TIMEOUT_MS,
->>>>>>> 1237
       );
 
       if (modelType === "image" || modelType === "video") {

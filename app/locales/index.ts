@@ -2,10 +2,7 @@ import cn from "./cn";
 import en from "./en";
 import pt from "./pt";
 import tw from "./tw";
-<<<<<<< HEAD
 import da from "./da";
-=======
->>>>>>> 1237
 import id from "./id";
 import fr from "./fr";
 import es from "./es";
@@ -34,10 +31,7 @@ const ALL_LANGS = {
   en,
   tw,
   pt,
-<<<<<<< HEAD
   da,
-=======
->>>>>>> 1237
   jp,
   ko,
   id,
@@ -64,10 +58,7 @@ export const ALL_LANG_OPTIONS: Record<Lang, string> = {
   en: "English",
   pt: "Português",
   tw: "繁體中文",
-<<<<<<< HEAD
   da: "Dansk",
-=======
->>>>>>> 1237
   jp: "日本語",
   ko: "한국어",
   id: "Indonesia",
@@ -153,10 +144,7 @@ export const STT_LANG_MAP: Record<Lang, string> = {
   en: "en-US",
   pt: "pt-BR",
   tw: "zh-TW",
-<<<<<<< HEAD
   da: "da-DK",
-=======
->>>>>>> 1237
   jp: "ja-JP",
   ko: "ko-KR",
   id: "id-ID",
