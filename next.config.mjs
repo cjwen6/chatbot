@@ -32,7 +32,22 @@ const nextConfig = {
   },
   experimental: {
     forceSwcTransforms: true,
+    serverActions: {
+      timeout: 3000000
+    }
   },
+  experimental: {
+    serverComponentsExternalPackages: ['sharp'],
+    forceSwcTransforms: true,
+    serverActions: {
+      timeout: 3000000
+    }
+  },
+  // Configure long timeout, merged with default
+  onDemandEntries: {
+    maxInactiveAge: 3000000,
+    pagesBufferLength: 2
+  }
 };
 
 const CorsHeaders = [

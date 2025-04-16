@@ -71,8 +71,9 @@ export const preferredRegion = [
 async function request(req: NextRequest, apiKey: string) {
   const controller = new AbortController();
 
-  let baseUrl = serverConfig.googleUrl || GEMINI_BASE_URL;
+  const isSSE = req?.nextUrl?.searchParams?.get("alt") === "sse";
 
+  let baseUrl = serverConfig.googleUrl || GEMINI_BASE_URL;
   let path = `${req.nextUrl.pathname}`.replaceAll(ApiPath.Google, "");
 
   if (!baseUrl.startsWith("http")) {
@@ -83,20 +84,8 @@ async function request(req: NextRequest, apiKey: string) {
     baseUrl = baseUrl.slice(0, -1);
   }
 
-  console.log("[Proxy] ", path);
-  console.log("[Base Url]", baseUrl);
+  const fetchUrl = `${baseUrl}${path}${isSSE ? "?alt=sse" : ""}`;
 
-  const timeoutId = setTimeout(
-    () => {
-      controller.abort();
-    },
-    10 * 60 * 1000,
-  );
-  const fetchUrl = `${baseUrl}${path}${
-    req?.nextUrl?.searchParams?.get("alt") === "sse" ? "?alt=sse" : ""
-  }`;
-
-  console.log("[Fetch Url] ", fetchUrl);
   const fetchOptions: RequestInit = {
     headers: {
       "Content-Type": "application/json",
@@ -107,27 +96,130 @@ async function request(req: NextRequest, apiKey: string) {
     },
     method: req.method,
     body: req.body,
-    // to fix #2485: https://stackoverflow.com/questions/55920957/cloudflare-worker-typeerror-one-time-use-body
     redirect: "manual",
-    // @ts-ignore
     duplex: "half",
     signal: controller.signal,
   };
 
-  try {
-    const res = await fetch(fetchUrl, fetchOptions);
-    // to prevent browser prompt for credentials
-    const newHeaders = new Headers(res.headers);
-    newHeaders.delete("www-authenticate");
-    // to disable nginx buffering
-    newHeaders.set("X-Accel-Buffering", "no");
+  if (isSSE) {
+    const { readable, writable } = new TransformStream();
+    const writer = writable.getWriter();
 
-    return new Response(res.body, {
-      status: res.status,
-      statusText: res.statusText,
-      headers: newHeaders,
+    // 构造心跳消息
+    const heartbeatMessage = {
+      candidates: [
+        {
+          content: {
+            parts: [
+              {
+                text: "思考中...",
+              },
+            ],
+            role: "model",
+          },
+          index: 0,
+          safetyRatings: [
+            {
+              category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+              probability: "NEGLIGIBLE",
+            },
+            {
+              category: "HARM_CATEGORY_HATE_SPEECH",
+              probability: "NEGLIGIBLE",
+            },
+            {
+              category: "HARM_CATEGORY_HARASSMENT",
+              probability: "NEGLIGIBLE",
+            },
+            {
+              category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+              probability: "NEGLIGIBLE",
+            },
+          ],
+        },
+      ],
+    };
+
+    // 发送初始心跳
+    writer.write(
+      new TextEncoder().encode(`data: ${JSON.stringify(heartbeatMessage)}\n\n`),
+    );
+
+    // 设置定期心跳
+    const heartbeat = setInterval(() => {
+      writer.write(
+        new TextEncoder().encode(
+          `data: ${JSON.stringify(heartbeatMessage)}\n\n`,
+        ),
+      );
+    }, 5000);
+
+    // 异步处理实际请求
+    fetch(fetchUrl, fetchOptions)
+      .then(async (res) => {
+        if (!res.ok) {
+          clearInterval(heartbeat);
+          const errorData = await res.text();
+          writer.write(
+            new TextEncoder().encode(
+              `data: ${JSON.stringify({ error: errorData })}\n\n`,
+            ),
+          );
+          writer.close();
+          return;
+        }
+
+        const reader = res.body?.getReader();
+        if (!reader) {
+          clearInterval(heartbeat);
+          writer.close();
+          return;
+        }
+
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            clearInterval(heartbeat); // 收到第一个响应后停止心跳
+            await writer.write(value);
+          }
+        } catch (e) {
+          console.error("Stream error:", e);
+        } finally {
+          clearInterval(heartbeat);
+          writer.close();
+          reader.releaseLock();
+        }
+      })
+      .catch((e) => {
+        clearInterval(heartbeat);
+        writer.write(
+          new TextEncoder().encode(
+            `data: ${JSON.stringify({ error: e.message })}\n\n`,
+          ),
+        );
+        writer.close();
+      });
+
+    return new Response(readable, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+        "X-Accel-Buffering": "no",
+      },
     });
-  } finally {
-    clearTimeout(timeoutId);
   }
+
+  // 非 SSE 请求保持原有逻辑
+  const res = await fetch(fetchUrl, fetchOptions);
+  const newHeaders = new Headers(res.headers);
+  newHeaders.delete("www-authenticate");
+  newHeaders.set("X-Accel-Buffering", "no");
+
+  return new Response(res.body, {
+    status: res.status,
+    statusText: res.statusText,
+    headers: newHeaders,
+  });
 }
