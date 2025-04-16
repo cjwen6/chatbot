@@ -86,7 +86,7 @@ async function request(req: NextRequest, apiKey: string) {
 
   const fetchUrl = `${baseUrl}${path}${isSSE ? "?alt=sse" : ""}`;
 
-  const fetchOptions: RequestInit & { duplex?: "half" } = {
+  const fetchOptions: RequestInit = {
     headers: {
       "Content-Type": "application/json",
       "Cache-Control": "no-store",
@@ -97,6 +97,7 @@ async function request(req: NextRequest, apiKey: string) {
     method: req.method,
     body: req.body,
     redirect: "manual",
+    // @ts-ignore
     duplex: "half",
     signal: controller.signal,
   };
