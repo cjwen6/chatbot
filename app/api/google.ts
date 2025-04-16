@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "./auth";
 import { getServerSideConfig } from "@/app/config/server";
-import { ModelProvider } from "@/app/constant";
+import { ApiPath, GEMINI_BASE_URL, ModelProvider } from "@/app/constant";
 import { prettyObject } from "@/app/utils/format";
 
 const serverConfig = getServerSideConfig();
@@ -69,7 +69,48 @@ export const preferredRegion = [
 ];
 
 async function request(req: NextRequest, apiKey: string) {
+  const controller = new AbortController();
+
   const isSSE = req?.nextUrl?.searchParams?.get("alt") === "sse";
+
+  let baseUrl = serverConfig.googleUrl || GEMINI_BASE_URL;
+  let path = `${req.nextUrl.pathname}`.replaceAll(ApiPath.Google, "");
+
+  if (!baseUrl.startsWith("http")) {
+    baseUrl = `https://${baseUrl}`;
+  }
+
+  if (baseUrl.endsWith("/")) {
+    baseUrl = baseUrl.slice(0, -1);
+  }
+
+  const fetchUrl = `${baseUrl}${path}${isSSE ? "?alt=sse" : ""}`;
+
+  const fetchOptions: RequestInit = {
+    headers: {
+      "Content-Type": "application/json",
+      "Cache-Control": "no-store",
+      "x-goog-api-key":
+        req.headers.get("x-goog-api-key") ||
+        (req.headers.get("Authorization") ?? "").replace("Bearer ", ""),
+    },
+    method: req.method,
+    body: req.body,
+    redirect: "manual",
+    // @ts-ignore
+    duplex: "half",
+    signal: controller.signal,
+  };
+
+  console.log("Starting request at:", Date.now());
+
+  const requestTimeoutId = setTimeout(
+    () => {
+      console.log("Timeout triggered at:", Date.now());
+      controller.abort();
+    },
+    10 * 60 * 1000,
+  );
 
   if (isSSE) {
     const { readable, writable } = new TransformStream();
@@ -110,32 +151,67 @@ async function request(req: NextRequest, apiKey: string) {
       ],
     };
 
-    let count = 0;
-    const maxCount = 300;
+    // 发送初始心跳
+    writer.write(
+      new TextEncoder().encode(`data: ${JSON.stringify(heartbeatMessage)}\n\n`),
+    );
 
-    const sendMessage = async () => {
-      if (count >= maxCount) {
-        writer.close();
-        return;
-      }
+    // 设置定期心跳
+    const heartbeat = setInterval(() => {
+      writer.write(
+        new TextEncoder().encode(
+          `data: ${JSON.stringify(heartbeatMessage)}\n\n`,
+        ),
+      );
+    }, 1000);
 
-      try {
-        await writer.write(
+    // 异步处理实际请求
+    fetch(fetchUrl, fetchOptions)
+      .then(async (res) => {
+        if (!res.ok) {
+          clearInterval(heartbeat);
+          const errorData = await res.text();
+          writer.write(
+            new TextEncoder().encode(
+              `data: ${JSON.stringify({ error: errorData })}\n\n`,
+            ),
+          );
+          writer.close();
+          return;
+        }
+
+        const reader = res.body?.getReader();
+        if (!reader) {
+          clearInterval(heartbeat);
+          writer.close();
+          return;
+        }
+
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            console.log("Received chunk:", value);
+            clearInterval(heartbeat); // 收到第一个响应后停止心跳
+            await writer.write(value);
+          }
+        } catch (e) {
+          console.error("Stream error:", e);
+        } finally {
+          clearInterval(heartbeat);
+          writer.close();
+          reader.releaseLock();
+        }
+      })
+      .catch((e) => {
+        clearInterval(heartbeat);
+        writer.write(
           new TextEncoder().encode(
-            `data: ${JSON.stringify(heartbeatMessage)}\n\n`,
+            `data: ${JSON.stringify({ error: e.message })}\n\n`,
           ),
         );
-        count++;
-        console.log(`Sent message ${count} at:`, Date.now());
-        setTimeout(sendMessage, 1000);
-      } catch (e) {
-        console.error("Write error:", e);
         writer.close();
-      }
-    };
-
-    // 开始发送消息
-    sendMessage();
+      });
 
     return new Response(readable, {
       headers: {
@@ -147,6 +223,15 @@ async function request(req: NextRequest, apiKey: string) {
     });
   }
 
-  // 非 SSE 请求返回空响应
-  return new Response(null, { status: 200 });
+  // 非 SSE 请求保持原有逻辑
+  const res = await fetch(fetchUrl, fetchOptions);
+  const newHeaders = new Headers(res.headers);
+  newHeaders.delete("www-authenticate");
+  newHeaders.set("X-Accel-Buffering", "no");
+
+  return new Response(res.body, {
+    status: res.status,
+    statusText: res.statusText,
+    headers: newHeaders,
+  });
 }
