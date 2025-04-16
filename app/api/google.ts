@@ -102,6 +102,16 @@ async function request(req: NextRequest, apiKey: string) {
     signal: controller.signal,
   };
 
+  console.log("Starting request at:", Date.now());
+
+  const requestTimeoutId = setTimeout(
+    () => {
+      console.log("Timeout triggered at:", Date.now());
+      controller.abort();
+    },
+    10 * 60 * 1000,
+  );
+
   if (isSSE) {
     const { readable, writable } = new TransformStream();
     const writer = writable.getWriter();
@@ -153,7 +163,7 @@ async function request(req: NextRequest, apiKey: string) {
           `data: ${JSON.stringify(heartbeatMessage)}\n\n`,
         ),
       );
-    }, 2000);
+    }, 1000);
 
     // 异步处理实际请求
     fetch(fetchUrl, fetchOptions)
@@ -181,6 +191,7 @@ async function request(req: NextRequest, apiKey: string) {
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
+            console.log("Received chunk:", value);
             clearInterval(heartbeat); // 收到第一个响应后停止心跳
             await writer.write(value);
           }
