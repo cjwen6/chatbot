@@ -153,7 +153,7 @@ async function request(req: NextRequest, apiKey: string) {
           `data: ${JSON.stringify(heartbeatMessage)}\n\n`,
         ),
       );
-    }, 5000);
+    }, 2000);
 
     // 异步处理实际请求
     fetch(fetchUrl, fetchOptions)
