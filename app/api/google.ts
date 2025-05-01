@@ -123,7 +123,41 @@ async function request(req: NextRequest, apiKey: string) {
           content: {
             parts: [
               {
-                text: "思考中...",
+                text: ".",
+              },
+            ],
+            role: "model",
+          },
+          index: 0,
+          safetyRatings: [
+            {
+              category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+              probability: "NEGLIGIBLE",
+            },
+            {
+              category: "HARM_CATEGORY_HATE_SPEECH",
+              probability: "NEGLIGIBLE",
+            },
+            {
+              category: "HARM_CATEGORY_HARASSMENT",
+              probability: "NEGLIGIBLE",
+            },
+            {
+              category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+              probability: "NEGLIGIBLE",
+            },
+          ],
+        },
+      ],
+    };
+
+    const heartbeatMessage2 = {
+      candidates: [
+        {
+          content: {
+            parts: [
+              {
+                text: "!\n\n",
               },
             ],
             role: "model",
@@ -156,6 +190,9 @@ async function request(req: NextRequest, apiKey: string) {
       new TextEncoder().encode(`data: ${JSON.stringify(heartbeatMessage)}\n\n`),
     );
 
+    // 开始发送正式内容前，发送 heartbeatMessage2
+    var heartbeatMessage2Sent = false;
+
     // 设置定期心跳
     const heartbeat = setInterval(() => {
       writer.write(
@@ -163,12 +200,20 @@ async function request(req: NextRequest, apiKey: string) {
           `data: ${JSON.stringify(heartbeatMessage)}\n\n`,
         ),
       );
-    }, 1000);
+    }, 2000);
 
     // 异步处理实际请求
     fetch(fetchUrl, fetchOptions)
       .then(async (res) => {
         if (!res.ok) {
+          if (!heartbeatMessage2Sent) {
+            writer.write(
+              new TextEncoder().encode(
+                `data: ${JSON.stringify(heartbeatMessage2)}\n\n`,
+              ),
+            );
+            heartbeatMessage2Sent = true;
+          }
           clearInterval(heartbeat);
           const errorData = await res.text();
           writer.write(
@@ -192,6 +237,14 @@ async function request(req: NextRequest, apiKey: string) {
             const { done, value } = await reader.read();
             if (done) break;
             console.log("Received chunk:", value);
+            if (!heartbeatMessage2Sent) {
+              writer.write(
+                new TextEncoder().encode(
+                  `data: ${JSON.stringify(heartbeatMessage2)}\n\n`,
+                ),
+              );
+              heartbeatMessage2Sent = true;
+            }
             clearInterval(heartbeat); // 收到第一个响应后停止心跳
             await writer.write(value);
           }
